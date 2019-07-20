@@ -1,0 +1,353 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>ESXi上的ubuntu16.04虚拟机安装NVIDIA驱动 | Mr Morning</title>
+  <meta name="author" content="Morning Duan">
+  
+  <meta name="description" content="Mr Morning&#39;s Blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="ESXi上的ubuntu16.04虚拟机安装NVIDIA驱动">
+  <meta property="og:site_name" content="Mr Morning">
+
+  
+    <meta property="og:image" content>
+  
+
+  
+  
+    <link href="/favicon.ico" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-70812759-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?cb5448498d7169c668b07c2b255d62c1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</head>
+</html>
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Mr Morning</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/atom.xml" title="Subscribe me.">
+			  <i class=""></i>RSS
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> ESXi上的ubuntu16.04虚拟机安装NVIDIA驱动</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>终于搞到了一块 NVIDIA k40显卡和一台服务器来跑神经网络，服务器配置那么好自然是要装虚拟机来榨干性能啦，但是NVIDIA的显卡驱动的安装并不顺利，安装过程中出现了循环登录和编译错误，于是有了这篇博文。</p>
+<p><img src="https://i.imgur.com/lkb808q.jpg" alt="img"></p>
+<a id="more"></a>
+
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="0-环境参数"><a href="#0-环境参数" class="headerlink" title="0. 环境参数"></a>0. 环境参数</h2><p>首先我要说一下我的环境参数：</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ESXi</td>
+<td align="left">6.7</td>
+</tr>
+<tr>
+<td align="left">Ubuntu</td>
+<td align="left">16.04</td>
+</tr>
+<tr>
+<td align="left">显卡</td>
+<td align="left">NVIDIA k40c</td>
+</tr>
+<tr>
+<td align="left">显卡驱动</td>
+<td align="left">384.66</td>
+</tr>
+<tr>
+<td align="left">gcc</td>
+<td align="left">5.4.0</td>
+</tr>
+</tbody></table>
+<h2 id="1-ESXi"><a href="#1-ESXi" class="headerlink" title="1. ESXi"></a>1. ESXi</h2><p>首先去<a href="https://my.vmware.com/en/web/vmware/evalcenter?p=free-esxi6" target="_blank" rel="noopener">VMware下载中心</a>注册个账号下载免费的ESXi，做个启动U盘安装到服务器上。然后记得设置ESXi服务器的IP地址，之后可以通过这个IP访问EXSi的web管理页面，服务器可以暂时放一边了。</p>
+<p>接下来，记得先把显卡设置为直通，我这是图省事，也可以避免虚拟化导致的性能下降（其实就是懒）。设置方法，<code>右边导航-&gt; 管理-&gt; 硬件-&gt; PCI设备-&gt; 找到显卡点切换直通</code>，设置完成后需要重新启动EXSi服务器。</p>
+<p>现在我们可以开始安装虚拟机了，怎么装？？我这里就不说了，记得要 <code>添加PCI设备（显卡）</code> 给虚拟机，然后启动虚拟机，启动成功的话就可以考虑显卡驱动的事儿了。</p>
+<h2 id="2-获取驱动"><a href="#2-获取驱动" class="headerlink" title="2. 获取驱动"></a>2. 获取驱动</h2><p>如何获取驱动是一个问题，方法一是直接在虚拟机中通过网页下载，方法二是下载好后拷贝给虚拟机。</p>
+<p>方法一：<br>ESXi通过虚拟交换机的方式来管理虚拟机们的，所以虚拟机与ESXi主机处于同一个内网网段中，如果你使用的拨号上网，那么在虚拟机中拨号一下就行了，当然可能你用的客户机会被挤掉线。如果你拥有PPTP服务器那就简单了，设置一下代理就OK啦。<code>或许</code> 把ESXi主机接入一台联网的路由器也是可行的，但是学校限制了路由器不好验证，如果你知道答案，请告诉我！<a href="mailto:booker_duan@yahoo.com" target="_blank" rel="noopener">booker_duan@yahoo.com</a></p>
+<p>方法二：<br>利用U盘拷贝到虚拟机也是可以的，但是这时候虚拟机是run在服务器上的哦，所以U盘要插在服务器上。<code>插上U盘-&gt; 关闭虚拟机（如果开着的话）-&gt; 编辑虚拟机设置-&gt; 添加USB设备（选择你的U盘）</code>，搞定之后开机，你的U盘就出现了。</p>
+<p>到<a href="https://www.nvidia.com/Download/index.aspx?lang=en" target="_blank" rel="noopener">NVIDIA驱动下载</a>下载对应的驱动。<br><code>注意：</code>操作系统选择Linux 64bit选项，即使提供了ubuntu 16.04的选项，最后得到的是一个<code>.run</code>的文件，不应该下载<code>.deb</code>格式的。</p>
+<p><code>建议：执行到这步，最好创建一个虚拟机快照</code></p>
+<h1 id="安装驱动"><a href="#安装驱动" class="headerlink" title="安装驱动"></a>安装驱动</h1><h2 id="0-总结总结"><a href="#0-总结总结" class="headerlink" title="0. 总结总结"></a>0. 总结总结</h2><p>网上说的驱动安装方法主要是三种：1、使用ubuntu自带的driver管理工具 2、使用apt安装 3、自行下载NVIDIA驱动安装。前两种方法都会遇到循环登录的问题。</p>
+<p>方法1：和执行<code>ubuntu-driver autoinstall</code>是一样的，结果：循环登录。<br>方法2：示例，<code>sudo apt install nvidia-384</code>，结果：循环登录。<br><code>方法3：</code> 示例<code>sudo ./NVIDIA-Linux-x86_64-384.66.run --no-opengl-files</code>，结果：安装成功。</p>
+<h2 id="1-详细说说"><a href="#1-详细说说" class="headerlink" title="1. 详细说说"></a>1. 详细说说</h2><p>我采用的方法3，具体步骤如下：</p>
+<ul>
+<li>禁用nouveau</li>
+</ul>
+<p>nouveau是ubuntu系统自带的开源驱动，所以先要把他禁用掉。</p>
+<p><code>sudo vim /etc/modprobe.d/blacklist.conf</code></p>
+<p>添加一行</p>
+<p><code>blacklist nouveau</code></p>
+<p>执行</p>
+<p><code>sudo update-initramfs -u</code></p>
+<p>重启后如果<code>lsmod | grep nouveau</code>没有输出，说明已经禁用了nouveau了。</p>
+<ul>
+<li>禁用X服务</li>
+</ul>
+<p><code>sudo service lightdm stop</code></p>
+<p>键盘<code>Ctrl</code>+<code>Alt</code>+<code>F1</code>进入tty1，登录。</p>
+<ul>
+<li>安装驱动文件</li>
+</ul>
+<p>执行<code>sudo ./NVIDIA-Linux-x86_64-384.66.run --no-opengl-files</code>安装驱动文件，注意参数。安装过程中dkms选择yes，其余continue就好了。如果全程没有出错，重启，运行<code>nvidia-smi</code>将会输出显卡信息，恭喜你安装成功了。如果你遇到了编译错误，请接着往下看。</p>
+<p>实验发现，如果方法三中不加上<code>--no-opengl-files</code>这个参数，会导致循环登录的问题，由于方法1和方法2不能添加此参数，所以循环登录，使用deb安装也是同理。我也想解决循环登录这个问题，查了一些资料也没用，你可以看看<code>~/.xsession-errors</code>，如果你解决了这个问题，希望你告诉我。<a href="mailto:booker_duan@yahoo.com" target="_blank" rel="noopener">booker_duan@yahoo.com</a></p>
+<h2 id="2-编译出错"><a href="#2-编译出错" class="headerlink" title="2. 编译出错"></a>2. 编译出错</h2><p>实际操作中我是遇到了编译错误，通过查看<code>/var/lib/dkms/nvidia/384.66/build/make.log</code>发现问题是</p>
+<p><code>[Werror]: error implicit declaration of function &#39;task_stack_page&#39;</code></p>
+<p>出现这个问题的原因可能是gcc版本较高造成的，因为和驱动编译的版本不统一导致了警告error的出现，由于找不到驱动编译使用的gcc版本，所以降级不太可能。我采用网上提供的方法解决了这个问题。</p>
+<ul>
+<li>解压驱动文件</li>
+</ul>
+<p><code>sudo ./nvidia.run -x</code></p>
+<ul>
+<li>修改源码</li>
+</ul>
+<p>编辑<code>[the-extracted-folder]/kernel/nvidia-uvm/uvm8_va_block.c</code></p>
+<p>添加一个头文件<code>#include &lt;linux/sched/task_stack.h&gt;</code></p>
+<ul>
+<li>再次安装驱动</li>
+</ul>
+<p><code>sudo [the-extracted-folder]/nvidia-installer --no-opengl-files</code>，注意参数。</p>
+<p>如果重启后运行<code>nvidia-smi</code>输出了显卡信息，恭喜你安装成功了。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a href="https://blog.csdn.net/u012759136/article/details/53355781" target="_blank" rel="noopener">【解决】Ubuntu安装NVIDIA驱动(咨询NVIDIA工程师的解决方案)</a><br><a href="https://stackoverflow.com/questions/48220265/cannot-install-nvidia-driver-in-function-block-cpu-fault-locked-error-impli" target="_blank" rel="noopener">cannot install nvidia driver , In function ‘block_cpu_fault_locked’: error implicit declaration of function ‘task_stack_page</a><br><a href="https://unix.stackexchange.com/questions/254377/xlib-extension-glx-missing-with-an-nvidia-card-and-on-board-graphics" target="_blank" rel="noopener">Xlib: extension “GLX” missing - with an NVIDIA card and on-board graphics</a></p>
+</blockquote>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+
+    
+    
+    <a href="/2018/07/26/how-to-export-ovf-template-from-esxi-server/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2018/01/08/how-to-run-aarch64-ubuntu-server-cloudimg-on-x86-64/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2018-07-20 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Articles/">Articles<span>6</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/Linux/">Linux<span>3</span></a></li> <li><a href="/tags/VMware/">VMware<span>2</span></a></li> <li><a href="/tags/Deep-Learning/">Deep Learning<span>3</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+		   <span class="toc-title">Contents</span>
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#前言"><span class="toc-article-text">前言</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#准备工作"><span class="toc-article-text">准备工作</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#0-环境参数"><span class="toc-article-text">0. 环境参数</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#1-ESXi"><span class="toc-article-text">1. ESXi</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#2-获取驱动"><span class="toc-article-text">2. 获取驱动</span></a></li></ol></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#安装驱动"><span class="toc-article-text">安装驱动</span></a><ol class="toc-article-child"><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#0-总结总结"><span class="toc-article-text">0. 总结总结</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#1-详细说说"><span class="toc-article-text">1. 详细说说</span></a></li><li class="toc-article-item toc-article-level-2"><a class="toc-article-link" href="#2-编译出错"><span class="toc-article-text">2. 编译出错</span></a></li></ol></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#参考"><span class="toc-article-text">参考</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2019 Morning Duan
+  
+      <br>POWER BY <a href="http://hexo.io/" target="_blank">Hexo</a> THEME BY <a href="https://github.com/blackshow/hexo-theme-freemind.386" target="_blank">Freemind.386</a>
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>

@@ -1,0 +1,281 @@
+<!DOCTYPE HTML>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="utf-8">
+  <meta http-equiv="pragma" content="no-cache">
+  <meta http-equiv="cache-control" content="no-cache">
+  <meta http-equiv="expires" content="0">
+  
+  <title>使用openCC写一个Python脚步来翻译ASS字幕文件 | Mr Morning</title>
+  <meta name="author" content="Morning Duan">
+  
+  <meta name="description" content="Mr Morning&#39;s Blog">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用openCC写一个Python脚步来翻译ASS字幕文件">
+  <meta property="og:site_name" content="Mr Morning">
+
+  
+    <meta property="og:image" content>
+  
+
+  
+  
+    <link href="/favicon.ico" rel="icon">
+  
+  
+  <link rel="stylesheet" href="/css/bootstrap.min.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/responsive.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/highlight.css" media="screen" type="text/css">
+  <link rel="stylesheet" href="/css/google-fonts.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+  <script src="/js/jquery-2.0.3.min.js"></script>
+
+  <!-- analytics -->
+  
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-70812759-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?cb5448498d7169c668b07c2b255d62c1";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+</head>
+</html>
+ <body>  
+  <nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <button type="button" class="navbar-header navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+		<span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+	  <a class="navbar-brand" href="/">Mr Morning</a>
+      <div class="collapse navbar-collapse nav-menu">
+		<ul class="nav navbar-nav">
+		  
+		  <li>
+			<a href="/archives" title="All the articles.">
+			  <i class=""></i>Archives
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/categories" title="All the categories.">
+			  <i class=""></i>Categories
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/tags" title="All the tags.">
+			  <i class=""></i>Tags
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/about" title="About me.">
+			  <i class=""></i>About
+			</a>
+		  </li>
+		  
+		  <li>
+			<a href="/atom.xml" title="Subscribe me.">
+			  <i class=""></i>RSS
+			</a>
+		  </li>
+		  
+		</ul>
+      </div>
+    </div> <!-- container -->
+</nav>
+<div class="clearfix"></div>
+
+  <div class="container">
+  	<div class="content">
+    	 
+
+
+	
+		<div class="page-header">
+			<h1> 使用openCC写一个Python脚步来翻译ASS字幕文件</h1>
+		</div>
+	
+
+
+
+<div class="row post">
+	<!-- cols -->
+	
+	<div id="top_meta"></div>
+	<div class="col-md-9">
+	
+
+	<!-- content -->
+	<div class="mypage">		
+	  		
+
+	  <h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><p>前段时间在TG上认识了同校的学弟，由于兴趣相投，都喜欢玩steam游戏，所以聊得挺开心的。学弟说他喜欢看动漫喜欢看繁体字幕可是有时候只能找到简体的，github上有个openCC的开源项目可以解决，但是他不会编程，问我能不能搞一个程序解决，既然有现成项目，应该写个小脚本就行。我打算用python来写。</p>
+<p><img src="https://i.imgur.com/OfShwfC.jpg" alt="img"></p>
+<a id="more"></a>
+
+<h1 id="上代码"><a href="#上代码" class="headerlink" title="上代码"></a>上代码</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## @booker_duan</span></span><br><span class="line"><span class="comment">## This programe translate Simplified Chinese to Tranditional Chinese</span></span><br><span class="line"><span class="comment">## Copy this script to ASS files directoy and run</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> glob</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> opencc</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set python encoding</span></span><br><span class="line">reload(sys)</span><br><span class="line">sys.setdefaultencoding(<span class="string">'utf-8'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Find ASS files from run-dir and sub run-dir</span></span><br><span class="line">match=glob.glob(<span class="string">r'*.ass'</span>)</span><br><span class="line">match_sub=glob.glob(<span class="string">r'*/*.ass'</span>)</span><br><span class="line">match[<span class="number">-1</span>:<span class="number">-1</span>]=match_sub</span><br><span class="line">match.sort()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> match:</span><br><span class="line">    <span class="comment"># Print file message</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">"Find matched ASS file, TOTAL:\t"</span>+str(len(match))</span><br><span class="line">    match_count=<span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> fname <span class="keyword">in</span> match:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">'['</span>+str(match_count)+<span class="string">']\t'</span>+fname</span><br><span class="line">        match_count=match_count+<span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> fname <span class="keyword">in</span> match:</span><br><span class="line">        <span class="keyword">print</span> <span class="string">"***Handling \t[ "</span> + fname + <span class="string">" ]***"</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># Read ASS file content</span></span><br><span class="line">        fread=open(fname,<span class="string">"r"</span>)</span><br><span class="line">        lines=fread.readlines()</span><br><span class="line">        fread.close()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Backup origin file if no .bak file</span></span><br><span class="line">        bak_match=glob.glob(fname+<span class="string">".bak"</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> bak_match:</span><br><span class="line">            os.rename(fname, fname+<span class="string">".bak"</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Operate ASS file content line by line</span></span><br><span class="line">        fwrite=open(fname,<span class="string">"w"</span>)</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> lines:</span><br><span class="line">            <span class="keyword">if</span> line:</span><br><span class="line">                <span class="comment">#line.rstrip("\r\n")</span></span><br><span class="line">                line=opencc.convert(line, config=<span class="string">'s2t.json'</span>)</span><br><span class="line">                <span class="comment">#print line</span></span><br><span class="line">                line.encode(<span class="string">'utf-8'</span>)</span><br><span class="line">                fwrite.write(line)</span><br><span class="line">        fwrite.close()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">print</span> <span class="string">"***Complete \t[ "</span> + fname + <span class="string">" ]***"</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># No matching</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="keyword">print</span> <span class="string">"[STOP]: No matched ASS file"</span></span><br></pre></td></tr></table></figure>
+
+<p>代码功能很简单，就是寻找到当前目录和下一级目录里的ASS文件，对这些文件进行读取然后备份，重命名为.bak后缀的文件，读取到的内容用openCC翻译保存为与原ASS文件相同的文件名。但这里有几个坑，使得我写的比想象中久。</p>
+<h1 id="坑①"><a href="#坑①" class="headerlink" title="坑①"></a>坑①</h1><p>使用pip安装OpenCC后我以为安装好了，直接运行opencc.convert()，结果报了个segmentation fault程序就结束了，一脸懵逼以为自己代码有问题，后面发现还要安装openCC库，也就是gayhub上面star最多的那个，我用的是deepin所以直接 <code>sudo apt-get install opencc</code> 就好了。</p>
+<h1 id="坑②"><a href="#坑②" class="headerlink" title="坑②"></a>坑②</h1><p>编码问题，由于python默认string类型编码为ascii所以把转换后的文字保存到string就会报错，为了省事，最后统一全部都用utf-8编码，代码开头需要加上 <code>sys.setdefaultencoding(&#39;utf-8&#39;)</code> 。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a href="https://pypi.python.org/pypi/OpenCC" target="_blank" rel="noopener">OpenCC 0.2 A ctypes-based OpenCC converter for Chinese</a><br><a href="https://github.com/BYVoid/OpenCC" target="_blank" rel="noopener">Open Chinese Convert 開放中文轉換</a><br><a href="http://blog.csdn.net/mindmb/article/details/7898528" target="_blank" rel="noopener">解决UnicodeDecodeError: ‘ascii’ codec can’t decode byte 0xe5 in position 108: ordinal not in range</a></p>
+</blockquote>
+	  
+	</div>
+
+	<div>
+  	<center>
+	<div class="pagination">
+
+    
+    
+    <a href="/2018/01/08/how-to-run-aarch64-ubuntu-server-cloudimg-on-x86-64/" type="button" class="btn btn-default"><i
+                class="fa fa-arrow-circle-o-left"></i> 上一页</a>
+    
+
+    <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
+    
+    <a href="/2017/07/18/use-ext2fsd-mount-ext4-partition-cause-a-superblock-error/" type="button" class="btn btn-default ">下一页<i
+                class="fa fa-arrow-circle-o-right"></i></a>
+    
+
+    
+</div>
+
+    </center>
+	</div>
+	
+	<!-- comment -->
+	
+<section id="comment">
+    <h2 class="title">留言</h2>
+
+    
+</section>
+
+
+	</div> <!-- col-md-9/col-md-12 -->
+		
+	
+	<div id="side_meta">
+		<div class="col-md-3" id="post_meta"> 
+
+	<!-- date -->
+	
+	<div class="meta-widget">
+	<i class="fa fa-clock-o"></i>
+	2017-11-01 
+	</div>
+	
+
+	<!-- categories -->
+    
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#categorys"><i class="fa fa-folder"></i></a>	
+    <ul id="categorys" class="tag_box list-unstyled collapse in">
+          
+  <li>
+    <li><a href="/categories/Articles/">Articles<span>6</span></a></li>
+  </li>
+
+    </ul>
+	</div>
+	
+
+	<!-- tags -->
+	
+	<div class="meta-widget">
+	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
+    <ul id="tags" class="tag_box list-unstyled collapse in">	  
+	    
+  <li><a href="/tags/Python/">Python<span>1</span></a></li> <li><a href="/tags/Programing/">Programing<span>1</span></a></li>
+    </ul>
+	</div>
+		
+
+	<!-- toc -->
+	<div class="meta-widget">
+	
+	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
+	   <div id="toc" class="toc collapse in">
+		   <span class="toc-title">Contents</span>
+			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#起因"><span class="toc-article-text">起因</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#上代码"><span class="toc-article-text">上代码</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#坑①"><span class="toc-article-text">坑①</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#坑②"><span class="toc-article-text">坑②</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#参考"><span class="toc-article-text">参考</span></a></li></ol>
+		</div>
+	
+	</div>
+	
+    <hr>
+	
+</div><!-- col-md-3 -->
+
+	</div>
+		
+
+</div><!-- row -->
+
+
+
+	</div>
+  </div>
+  <div class="container-narrow">
+  <footer> <p>
+  &copy; 2019 Morning Duan
+  
+      <br>POWER BY <a href="http://hexo.io/" target="_blank">Hexo</a> THEME BY <a href="https://github.com/blackshow/hexo-theme-freemind.386" target="_blank">Freemind.386</a>
+</p>
+ </footer>
+</div> <!-- container-narrow -->
+  
+
+
+  
+<a id="gotop" href="#">   
+  <span>⬆︎TOP</span>
+</a>
+
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/search.js"></script> 
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+
+
+</body>
+   </html>
