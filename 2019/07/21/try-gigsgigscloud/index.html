@@ -6,7 +6,7 @@
   <meta http-equiv="cache-control" content="no-cache">
   <meta http-equiv="expires" content="0">
   
-  <title>Save my data!! 使用 ext2fsd 挂载ext4分区导致 superblock checksum does not match 问题解决 | Mr Morning</title>
+  <title>GigsGigsCloud试坑 | Mr Morning</title>
   <meta name="author" content="Morning Duan">
   
   <meta name="description" content="Mr Morning&#39;s Blog">
@@ -14,7 +14,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-  <meta property="og:title" content="Save my data!! 使用 ext2fsd 挂载ext4分区导致 superblock checksum does not match 问题解决">
+  <meta property="og:title" content="GigsGigsCloud试坑">
   <meta property="og:site_name" content="Mr Morning">
 
   
@@ -118,7 +118,7 @@ var _hmt = _hmt || [];
 
 	
 		<div class="page-header">
-			<h1> Save my data!! 使用 ext2fsd 挂载ext4分区导致 superblock checksum does not match 问题解决</h1>
+			<h1> GigsGigsCloud试坑</h1>
 		</div>
 	
 
@@ -135,22 +135,72 @@ var _hmt = _hmt || [];
 	<div class="mypage">		
 	  		
 
-	  <h1 id="前因后果"><a href="#前因后果" class="headerlink" title="前因后果"></a>前因后果</h1><p>实验室师姐需要在win10下挂载ext3分区，我就百度了一下发现了一个叫Ext2Fsd的神器，能够在windows下挂载ext2,3,4分区，我就下载了最新的Ext2Fsd-0.69在自己的机子上试试效果。我使用了实验室的电脑，安装了win10，移动硬盘上安装了Deepin作为平时工作使用的Linux系统，安装后运行Ext2Fsd果真能挂载移动硬盘中的ext4分区并能够读写。</p>
-<p>当我打算进入Deepin工作的时候悲剧发生了，系统无法挂载我在win10中挂载的分区。开机进入initramfs并且显示superblock checksum does match 的错误。系统里还有很多资料和最近项目的数据呢。</p>
-<p><img src="http://i.imgur.com/Mn3iIrS.jpg" alt="img"></p>
+	  <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近VPS都在涨价，就连Bandwagon家的最便宜的方案都要50刀/year。虽然之前购买过便宜套餐的用户可以通过续费一直维持下去，但我想趁这个机会试试别家的VPS。GigsGigsCloud家的HK VPS非常便宜，但是网上评价褒贬不一，据说非常不稳定因此被戏称作GG Boom。于是我决定先买个1个月试试水。</p>
+<p><img src="https://i.imgur.com/m5Q0oHs.jpg" alt="img"></p>
 <a id="more"></a>
-<p>Baidu Google稍微搜索了一下，问题在于Ext4分区在被win10挂载时它的metadata_csum功能会出错。具体原理我懒也没仔细看，可能就像windows和linux双系统系统时间总要差6小时那样。在别的linux下挂载损坏的两个分区也显示superblock错误。（神奇的是win10下使用Ext2Fsd能够挂载，虽然并没卵用！！）最终找到了能够修复分区的方法，Save my data！！</p>
-<h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1><ol>
-<li>首先，由于原系统已经无法进入，我们需要一个可用于维护的Linux系统，我安装Deepin系统到U盘中用于维护。</li>
-<li>打开维护系统的终端，输入<code>sudo fdisk -lu</code>查看分区表，通过分区大小判断是哪些分区出错了，我的情况是<code>sda2，sda6</code>。<br><img src="http://i.imgur.com/ZywNoel.png" alt="img"></li>
-<li>输入<code>sudo tune2fs -l /dev/sda2</code>查看是否开启了metadata_csum功能，输出了一长列数字即是开启了此功能。</li>
-<li>输入<code>sudo fsck.ext4 -p -b 884736 -B 4096 /dev/sda2</code>尝试修复sda2分区，也可以使用<code>fsck -t ext4 /dev/sda2</code>修复，出现提示就一直按y就好了。</li>
-<li><code>sudo reboot</code></li>
+
+<h1 id="套餐选择"><a href="#套餐选择" class="headerlink" title="套餐选择"></a>套餐选择</h1><p>GigsGigsCloud的机房在HK和SG，提供CLOUDLET V，CLOUDLET K，CLOUDLET B三种套餐。其中V是高端套餐，电信联通移动直连；CLOUDLET K是KVM架构，据称对特定线路有优化；CLOUDLET B是普通套餐，openVZ架构。我选择的是CLOUDLET K（HK-China），因为V太贵了，数据还很少，而B套餐太便宜了，不敢买。你可以在<a href="https://clientarea.gigsgigscloud.com/index.php?/cart/cloudlet-k--hk-china-/&step=0" target="_blank" rel="noopener">clientarea</a>查看详细的套餐列表，部分套餐如下图。我买的5.8刀/月的套餐已经没有了，最便宜的是8.8刀/月的套餐，此外可以用网友提供的推荐码打折，但貌似只能打折一次。</p>
+<p><img src="https://i.imgur.com/ZNz3fsd.png" alt="img"></p>
+<p>我购买的的套餐参数如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Price</td>
+<td align="left">5.8$/month</td>
+</tr>
+<tr>
+<td align="left">CPU</td>
+<td align="left">1*vCore</td>
+</tr>
+<tr>
+<td align="left">RAM</td>
+<td align="left">500M</td>
+</tr>
+<tr>
+<td align="left">Storage</td>
+<td align="left">15G SSD</td>
+</tr>
+<tr>
+<td align="left">IP</td>
+<td align="left">1*IPv4</td>
+</tr>
+<tr>
+<td align="left">Bandwidth</td>
+<td align="left">30Mbps Max</td>
+</tr>
+<tr>
+<td align="left">Data Transfer</td>
+<td align="left">400GB</td>
+</tr>
+<tr>
+<td align="left">Location</td>
+<td align="left">HK</td>
+</tr>
+</tbody></table>
+<h1 id="使用体验"><a href="#使用体验" class="headerlink" title="使用体验"></a>使用体验</h1><ol start="0">
+<li>延迟<br>使用站长工具提供的<a href="https://ping.chinaz.com/" target="_blank" rel="noopener">多地Ping工具</a>测试延迟，结果如下：</li>
 </ol>
-<h1 id="多说一句"><a href="#多说一句" class="headerlink" title="多说一句"></a>多说一句</h1><p>就结果来说还是不错的，但是以后都不敢用Ext2Fsd这类工具了，折中的办法就是在为Linux系统分区时分一部分格式化为NTFS作为共享分区，windows和Linux可以通过这个分区来交换数据。</p>
-<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
-<p><a href="https://askubuntu.com/questions/849872/how-can-i-prevent-windows-10-from-corrupting-the-ext4-superblock-every-time/858309#858309" target="_blank" rel="noopener">How can I prevent Windows 10 from corrupting the ext4 superblock every time?</a><br><a href="http://jingyan.baidu.com/article/495ba841d5330738b20ede44.html" target="_blank" rel="noopener">（完美解决）linux 开机进入initramfs无法开机</a></p>
-</blockquote>
+<p>其中电信线路延迟最低，平均52.6ms，可以对比我买的Bandwagon家的LA机房CN2线路，电信线路平均延迟178.5ms。<br><img src="https://i.imgur.com/FKTUeNI.png" alt="img"></p>
+<p>下图为各省的延迟，可以看到延迟都很低（福建超时应该是工具的问题）。总而言之，HK的机子还是很香的。<br><img src="https://i.imgur.com/L26wEwl.png" alt="img"></p>
+<ol>
+<li><p>带宽<br>由于我的水管小，只有10M，所以不怎么好测试。我用speedtest测了一下，可以跑满。</p>
+</li>
+<li><p>稳定性<br>没遇到过网友说的情况。但GigsGigsCloud的确实给人感觉比较卡，rebuild系统比Bandwagon慢（重置密码花了十几分钟）。<br>另外GigsGigsCloud不提供带BBR的系统镜像，所以需要自己安装。</p>
+</li>
+</ol>
+<p>可以安装centos7.5后使用脚本来安装BBR：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh &amp;&amp; chmod +x bbr.sh &amp;&amp; ./bbr.sh</span><br></pre></td></tr></table></figure>
+
+<p>该脚本会更新内核并安装BBR，完成后输入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl net.ipv4.tcp_available_congestion_control</span><br></pre></td></tr></table></figure>
+
+<p>如果返回<code>net.ipv4.tcp_available_congestion_control = bbr cubic reno</code>便是安装成功了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="https://i.imgur.com/vcf41nC.jpg" alt="img"></p>
 	  
 	</div>
 
@@ -160,13 +210,12 @@ var _hmt = _hmt || [];
 
     
     
-    <a href="/2017/11/01/use-opencc-write-a-python-script/" type="button" class="btn btn-default"><i
-                class="fa fa-arrow-circle-o-left"></i> Prev</a>
+    <a type="button" class="btn btn-default disabled"><i class="fa fa-arrow-circle-o-left"></i>Prev</a>
     
 
     <a href="/" type="button" class="btn btn-default"><i class="fa fa-home"></i>Home</a>
     
-    <a href="/2017/03/24/Hello-Hexo/" type="button" class="btn btn-default ">Next<i
+    <a href="/2019/07/20/dig-deeper-in-federated-learning-advantages-and-challenges/" type="button" class="btn btn-default ">Next<i
                 class="fa fa-arrow-circle-o-right"></i></a>
     
 
@@ -195,7 +244,7 @@ var _hmt = _hmt || [];
 	
 	<div class="meta-widget">
 	<i class="fa fa-clock-o"></i>
-	2017-07-18 
+	2019-07-21 
 	</div>
 	
 
@@ -219,19 +268,13 @@ var _hmt = _hmt || [];
 	<a data-toggle="collapse" data-target="#tags"><i class="fa fa-tags"></i></a>		  
     <ul id="tags" class="tag_box list-unstyled collapse in">	  
 	    
-  <li><a href="/tags/Deepin/">Deepin<span>1</span></a></li> <li><a href="/tags/FileSystem/">FileSystem<span>1</span></a></li>
+  <li><a href="/tags/VPS/">VPS<span>1</span></a></li>
     </ul>
 	</div>
 		
 
 	<!-- toc -->
 	<div class="meta-widget">
-	
-	   <a data-toggle="collapse" data-target="#toc"><i class="fa fa-bars"></i></a>
-	   <div id="toc" class="toc collapse in">
-		   <span class="toc-title">Contents</span>
-			<ol class="toc-article"><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#前因后果"><span class="toc-article-text">前因后果</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#解决方法"><span class="toc-article-text">解决方法</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#多说一句"><span class="toc-article-text">多说一句</span></a></li><li class="toc-article-item toc-article-level-1"><a class="toc-article-link" href="#参考"><span class="toc-article-text">参考</span></a></li></ol>
-		</div>
 	
 	</div>
 	
