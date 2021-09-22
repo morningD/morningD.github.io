@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="default,zh-CN,zh-TW,default">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Morning Duan">
+
+
+    <meta name="subtitle" content="Welcome!! Just write for fun">
+
+
+
+
+
+
+<title>使用Qemu在x86_64机器上安装aarch64的ubuntu server 16.04 | Mr Morning</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+  <!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Mr Morning&#39;s Blog</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Linux/">
+                            Linux
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/Qemu/">
+                            Qemu
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                使用Qemu在x86_64机器上安装aarch64的ubuntu server 16.04
+            
+            
+        </div>
+        <span class="post-date">
+            Jan 8, 2018
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <img src="https://i.imgur.com/qLh3WkU.jpg" alt="featured_image">
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>由于实验需求，现需要在Qemu上安装aarch64的ubuntu系统，但是手头上只有x86_64架构的机子。还好Qemu支持宿主机与客户机不同架构，所以理论上是可行的，那么就开始做吧！！（其实坑好多的）</p>
+<span id="more"></span>
+
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="0-安装Qemu-amp-下载ubuntu"><a href="#0-安装Qemu-amp-下载ubuntu" class="headerlink" title="0. 安装Qemu &amp; 下载ubuntu"></a>0. 安装Qemu &amp; 下载ubuntu</h2><p>我就说说Ubuntu的镜像吧，我下载是xenial-server-cloudimg-arm64-uefi1.img，<a target="_blank" rel="noopener" href="http://cloud-images.ubuntu.com/releases/16.04/release/">下载地址</a>。选择arm64和uefi1结尾的img镜像即可。这里我使用的直接镜像启动，核启动需要下载disk1结尾的镜像，另外还需要提取linuz和initramfs，方法可以参考<a target="_blank" rel="noopener" href="http://www.cnblogs.com/wangaohui/p/5184476.html">ARM64调试环境 - 简单地快乐 - 博客园</a></p>
+<h2 id="1-安装AAVMF"><a href="#1-安装AAVMF" class="headerlink" title="1. 安装AAVMF"></a>1. 安装AAVMF</h2><p>编译并安装好Qemu后，还需要安装aarch64的UEFI固件。这里可以使用OVMF *(Open Virtual Machine Firmware)*，其中aarch64架构的又叫做AAVMF。安装非常简单，其实就是下载一个叫QEMU_EFI.fd的文件。如果有apt，直接<code>sudo apt-get install qemu-efi</code>，固件就会下载到<code>/usr/share/qemu-efi/</code>中。如果用的是yum，便是<code>yum install edk2.git-aarch64</code>，只不过目录在<code>/usr/share/edk2.git/aarch64/</code>中。</p>
+<h2 id="2-准备UEFI-flash"><a href="#2-准备UEFI-flash" class="headerlink" title="2.准备UEFI flash"></a>2.准备UEFI flash</h2><p>虽然OVMF手册上写可以直接使用-pflash参数直接使用QEMU_EFI.fd固件用于启动。但实际操作会报无法读取pfalsh0的错误。所以还需要准备一下启动用的pflash，命令如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dd if=/dev/zero of=flash0.img bs=1M count=64</span><br><span class="line">dd if=/usr/share/qemu-efi/QEMU_EFI.fd of=flash0.img conv=notrunc</span><br><span class="line">dd if=/dev/zero of=flash1.img bs=1M count=64</span><br></pre></td></tr></table></figure>
+<p>其中flash0.img即UEFI固件，flash1是VARS。</p>
+<h2 id="3-准备初始化配置文件"><a href="#3-准备初始化配置文件" class="headerlink" title="3. 准备初始化配置文件"></a>3. 准备初始化配置文件</h2><p>由于ubuntu server不提供密码配置，也就是说安装后是无法通过root用户和密码登录系统的，我们需要在系统启动前编写好配置文件，将自己的ssh公钥添加进去，然后使用ssh登录。首先要下载云配置文件生成工具<code>sudo apt install cloud-utils</code>。编写配置文件<code>cloud.txt</code>，参考如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#cloud-config</span><br><span class="line"></span><br><span class="line">users:</span><br><span class="line">  - name: ubuntu</span><br><span class="line">    ssh-authorized-keys:</span><br><span class="line">      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCw+5N1GWY1KM7ZQEKc/CIPOdwqM4BbBGvcNwodtxPZv0pTCR5PnzxHAY/36bEjRyqcR81dg72LeF3DIjmEqkjfXnr44yVmUfqyN0lz/4EzWI8a6A6vXMKf1wJbPRNXR5utEFFg4VAbc7noYHpa8j3dzPBmp5kjzzy0+z421r4MMzJFRoiqQWMLOdHKl7R/SDB/36fHeBSwzFmfJVlhtiSfk3e51nsS7ISC0MBfBi0baliutbVWS+YyZkoibQOgY01uL11zc5JzUQ9W0/GjImZn99GA23hFU04Fxle88YF3sEvohBZy7tAPwVBySRxB3fMuDaHVOPjHtpfCIYdzjN7r yooo@yooo-pc</span><br><span class="line">    sudo: [&#x27;ALL=(ALL) NOPASSWD:ALL&#x27;]</span><br><span class="line">    groups: sudo</span><br><span class="line">    shell: /bin/bash</span><br></pre></td></tr></table></figure>
+<p>name为登录用的有户名，ssh-rsa下方的内容为你的ssh公钥，一般在<code>~/.ssh/id_rsa.pub</code>中。编写好后保存，执行<code>cloud-localds cloud.img cloud.txt</code>即可生成配置文件<code>cloud.img</code>。</p>
+<h2 id="4-编写启动脚本"><a href="#4-编写启动脚本" class="headerlink" title="4. 编写启动脚本"></a>4. 编写启动脚本</h2><p>由于启动参数比较多，最好编写一个Qemu的启动脚本，就叫<code>./qemu_start.sh</code>吧，参考如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-aarch64 \</span><br><span class="line">-m 4096 -cpu cortex-a57 -M virt \</span><br><span class="line">-serial stdio \</span><br><span class="line">-pflash flash0.img -pflash flash1.img \</span><br><span class="line">-drive if=none,file=xenial-server-cloudimg-arm64-uefi1.img,id=image \</span><br><span class="line">-device virtio-blk-device,drive=image \</span><br><span class="line">-device virtio-blk-device,drive=cloud \</span><br><span class="line">-drive if=none,id=cloud,file=cloud.img \</span><br><span class="line">-netdev user,hostfwd=tcp::2222-:22,id=unet -device virtio-net-device,netdev=unet \</span><br></pre></td></tr></table></figure>
+<p>关于每一项的具体含义我就不解释啦，可以查找<a target="_blank" rel="noopener" href="https://qemu.weilnetz.de/doc/qemu-doc.html">Qemu手册</a>。</p>
+<h1 id="万事俱备-启动Qemu"><a href="#万事俱备-启动Qemu" class="headerlink" title="万事俱备 启动Qemu"></a>万事俱备 启动Qemu</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo ./qemu_start.sh</span><br></pre></td></tr></table></figure>
+<p>按照网上的教程这一步应该就可以进入虚拟机了，新开一个终端，输入<code>ssh ubuntu@localhost -p 2222</code>（这里的ubuntu为cloud.txt配置中的name），即用ssh协议登录虚拟机了。</p>
+<p><em>但是，我还遇到了一些麻烦，你遇到了吗？？如下图一样</em><br><img src="https://i.imgur.com/jOyH6wn.png" alt="img"></p>
+<h1 id="修复引导（找不到root请继续看）"><a href="#修复引导（找不到root请继续看）" class="headerlink" title="修复引导（找不到root请继续看）"></a>修复引导（找不到root请继续看）</h1><ol>
+<li>对的，如果显示<code>error：no such device: root</code>，那么就是引导出了问题。再次执行启动脚本，就会进入UEFI界面。<br><img src="https://i.imgur.com/BF8WjX6.png" alt="img"></li>
+<li>输入<code>c</code>进入GRUB命令行模式。输入ls查看硬盘状态，找到ubuntu系统根目录，从分区boot目录下的内容可以找到，这里根目录在(hd3,gpt1)中：<br><img src="https://i.imgur.com/2e7YMwG.png" alt="img"></li>
+<li>输入以下命令启动<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">set root=(hd3,gpt1)</span><br><span class="line">linux /boot/vmlinuz-4.4.0-104-generic root=/dev/vdb1</span><br><span class="line">initrd /boot/initrd.img-4.4.0-104-generic</span><br><span class="line">boot</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><strong>注意</strong>：这里(hd3,gpt1)是ubuntu系统根目录分区，即boot目录下有内容的那个分区，不是请替换。linux后的vmlinuz-4.4.0-104-generic对应(hd3,gpt1)/boot下的内容，不是请替换。initrd.img-4.4.0-104-generic同理。另外这里的/dev/vdb1是不确定的，如果无法启动linux进入了initramfs，输入<code>ls /dev/</code>查看是否有vdb1设备，如果是vda1，或者vdc等等等等，那就改成对应设备重新启动一次。<br>4. 系统启动后使用ssh登录系统，输入:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo update-grub2</span><br></pre></td></tr></table></figure>
+<p>自动更新GRUB配置文件，再次启动就不会找不到根目录了。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="http://www.cnblogs.com/wangaohui/p/5184476.html">ARM64调试环境 - 简单地快乐 - 博客园</a><br><a target="_blank" rel="noopener" href="https://wiki.ubuntu.com/ARM64/QEMU">Ubuntu wiki</a><br><a target="_blank" rel="noopener" href="http://blog.system76.com/post/139138591598/howto-qemu-w-ubuntu-xenial-host-uefi-guest">Howto: QEMU w/ Ubuntu Xenial host + UEFI guest</a><br><a target="_blank" rel="noopener" href="https://www.cnx-software.com/2016/05/10/how-to-run-ubuntu-16-04-aarch64-64-bit-arm-cloud-images-on-your-intelamd-linux-computer/">How to Run Ubuntu 16.04 Aarch64 (64-bit ARM) Cloud Images on Your Intel/AMD Linux Computer with QEMU</a><br><a target="_blank" rel="noopener" href="http://benjr.tw/96166">CentOS – ARM KVM</a><br><a target="_blank" rel="noopener" href="https://github.com/tianocore/tianocore.github.io/wiki/OVMF">OVMF github</a><br><a target="_blank" rel="noopener" href="http://linux.vbird.org/linux_basic/0510osloader.php#grub_other">鳥哥的 Linux 私房菜 19.3.6 開機前的額外功能修改</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/linux_hua130/article/details/51356599">让Grub 2来拯救你的 bootloader *转载</a></p>
+</blockquote>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2018/07/20/2018-07-20-esxi-ubuntu-install-nvidia-driver/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2017/11/01/2017-11-01-use-opencc-write-a-python-script/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                ©MorningD | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

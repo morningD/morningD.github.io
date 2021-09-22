@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="default,zh-CN,zh-TW,default">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Morning Duan">
+
+
+    <meta name="subtitle" content="Welcome!! Just write for fun">
+
+
+
+
+
+
+<title>ESXi上的ubuntu16.04虚拟机安装NVIDIA驱动 | Mr Morning</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+  <!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Mr Morning&#39;s Blog</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Linux/">
+                            Linux
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/VMware/">
+                            VMware
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/Deep-Learning/">
+                            Deep Learning
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                ESXi上的ubuntu16.04虚拟机安装NVIDIA驱动
+            
+            
+        </div>
+        <span class="post-date">
+            Jul 20, 2018
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>终于搞到了一块 NVIDIA k40显卡和一台服务器来跑神经网络，服务器配置那么好自然是要装虚拟机来榨干性能啦，但是NVIDIA的显卡驱动的安装并不顺利，安装过程中出现了循环登录和编译错误，于是有了这篇博文。</p>
+<p><img src="https://i.imgur.com/lkb808q.jpg" alt="img"></p>
+<span id="more"></span>
+
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><h2 id="0-环境参数"><a href="#0-环境参数" class="headerlink" title="0. 环境参数"></a>0. 环境参数</h2><p>首先我要说一下我的环境参数：</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ESXi</td>
+<td align="left">6.7</td>
+</tr>
+<tr>
+<td align="left">Ubuntu</td>
+<td align="left">16.04</td>
+</tr>
+<tr>
+<td align="left">显卡</td>
+<td align="left">NVIDIA k40c</td>
+</tr>
+<tr>
+<td align="left">显卡驱动</td>
+<td align="left">384.66</td>
+</tr>
+<tr>
+<td align="left">gcc</td>
+<td align="left">5.4.0</td>
+</tr>
+</tbody></table>
+<h2 id="1-ESXi"><a href="#1-ESXi" class="headerlink" title="1. ESXi"></a>1. ESXi</h2><p>首先去<a target="_blank" rel="noopener" href="https://my.vmware.com/en/web/vmware/evalcenter?p=free-esxi6">VMware下载中心</a>注册个账号下载免费的ESXi，做个启动U盘安装到服务器上。然后记得设置ESXi服务器的IP地址，之后可以通过这个IP访问EXSi的web管理页面，服务器可以暂时放一边了。</p>
+<p>接下来，记得先把显卡设置为直通，我这是图省事，也可以避免虚拟化导致的性能下降（其实就是懒）。设置方法，<code>右边导航-&gt; 管理-&gt; 硬件-&gt; PCI设备-&gt; 找到显卡点切换直通</code>，设置完成后需要重新启动EXSi服务器。</p>
+<p>现在我们可以开始安装虚拟机了，怎么装？？我这里就不说了，记得要 <code>添加PCI设备（显卡）</code> 给虚拟机，然后启动虚拟机，启动成功的话就可以考虑显卡驱动的事儿了。</p>
+<h2 id="2-获取驱动"><a href="#2-获取驱动" class="headerlink" title="2. 获取驱动"></a>2. 获取驱动</h2><p>如何获取驱动是一个问题，方法一是直接在虚拟机中通过网页下载，方法二是下载好后拷贝给虚拟机。</p>
+<p>方法一：<br>ESXi通过虚拟交换机的方式来管理虚拟机们的，所以虚拟机与ESXi主机处于同一个内网网段中，如果你使用的拨号上网，那么在虚拟机中拨号一下就行了，当然可能你用的客户机会被挤掉线。如果你拥有PPTP服务器那就简单了，设置一下代理就OK啦。<code>或许</code> 把ESXi主机接入一台联网的路由器也是可行的，但是学校限制了路由器不好验证，如果你知道答案，请告诉我！<a href="mailto:booker_duan@yahoo.com">booker_duan@yahoo.com</a></p>
+<p>方法二：<br>利用U盘拷贝到虚拟机也是可以的，但是这时候虚拟机是run在服务器上的哦，所以U盘要插在服务器上。<code>插上U盘-&gt; 关闭虚拟机（如果开着的话）-&gt; 编辑虚拟机设置-&gt; 添加USB设备（选择你的U盘）</code>，搞定之后开机，你的U盘就出现了。</p>
+<p>到<a target="_blank" rel="noopener" href="https://www.nvidia.com/Download/index.aspx?lang=en">NVIDIA驱动下载</a>下载对应的驱动。<br><code>注意：</code>操作系统选择Linux 64bit选项，即使提供了ubuntu 16.04的选项，最后得到的是一个<code>.run</code>的文件，不应该下载<code>.deb</code>格式的。</p>
+<p><code>建议：执行到这步，最好创建一个虚拟机快照</code></p>
+<h1 id="安装驱动"><a href="#安装驱动" class="headerlink" title="安装驱动"></a>安装驱动</h1><h2 id="0-总结总结"><a href="#0-总结总结" class="headerlink" title="0. 总结总结"></a>0. 总结总结</h2><p>网上说的驱动安装方法主要是三种：1、使用ubuntu自带的driver管理工具 2、使用apt安装 3、自行下载NVIDIA驱动安装。前两种方法都会遇到循环登录的问题。</p>
+<p>方法1：和执行<code>ubuntu-driver autoinstall</code>是一样的，结果：循环登录。<br>方法2：示例，<code>sudo apt install nvidia-384</code>，结果：循环登录。<br><code>方法3：</code> 示例<code>sudo ./NVIDIA-Linux-x86_64-384.66.run --no-opengl-files</code>，结果：安装成功。</p>
+<h2 id="1-详细说说"><a href="#1-详细说说" class="headerlink" title="1. 详细说说"></a>1. 详细说说</h2><p>我采用的方法3，具体步骤如下：</p>
+<ul>
+<li>禁用nouveau</li>
+</ul>
+<p>nouveau是ubuntu系统自带的开源驱动，所以先要把他禁用掉。</p>
+<p><code>sudo vim /etc/modprobe.d/blacklist.conf</code></p>
+<p>添加一行</p>
+<p><code>blacklist nouveau</code></p>
+<p>执行</p>
+<p><code>sudo update-initramfs -u</code></p>
+<p>重启后如果<code>lsmod | grep nouveau</code>没有输出，说明已经禁用了nouveau了。</p>
+<ul>
+<li>禁用X服务</li>
+</ul>
+<p><code>sudo service lightdm stop</code></p>
+<p>键盘<code>Ctrl</code>+<code>Alt</code>+<code>F1</code>进入tty1，登录。</p>
+<ul>
+<li>安装驱动文件</li>
+</ul>
+<p>执行<code>sudo ./NVIDIA-Linux-x86_64-384.66.run --no-opengl-files</code>安装驱动文件，注意参数。安装过程中dkms选择yes，其余continue就好了。如果全程没有出错，重启，运行<code>nvidia-smi</code>将会输出显卡信息，恭喜你安装成功了。如果你遇到了编译错误，请接着往下看。</p>
+<p>实验发现，如果方法三中不加上<code>--no-opengl-files</code>这个参数，会导致循环登录的问题，由于方法1和方法2不能添加此参数，所以循环登录，使用deb安装也是同理。我也想解决循环登录这个问题，查了一些资料也没用，你可以看看<code>~/.xsession-errors</code>，如果你解决了这个问题，希望你告诉我。<a href="mailto:booker_duan@yahoo.com">booker_duan@yahoo.com</a></p>
+<h2 id="2-编译出错"><a href="#2-编译出错" class="headerlink" title="2. 编译出错"></a>2. 编译出错</h2><p>实际操作中我是遇到了编译错误，通过查看<code>/var/lib/dkms/nvidia/384.66/build/make.log</code>发现问题是</p>
+<p><code>[Werror]: error implicit declaration of function &#39;task_stack_page&#39;</code></p>
+<p>出现这个问题的原因可能是gcc版本较高造成的，因为和驱动编译的版本不统一导致了警告error的出现，由于找不到驱动编译使用的gcc版本，所以降级不太可能。我采用网上提供的方法解决了这个问题。</p>
+<ul>
+<li>解压驱动文件</li>
+</ul>
+<p><code>sudo ./nvidia.run -x</code></p>
+<ul>
+<li>修改源码</li>
+</ul>
+<p>编辑<code>[the-extracted-folder]/kernel/nvidia-uvm/uvm8_va_block.c</code></p>
+<p>添加一个头文件<code>#include &lt;linux/sched/task_stack.h&gt;</code></p>
+<ul>
+<li>再次安装驱动</li>
+</ul>
+<p><code>sudo [the-extracted-folder]/nvidia-installer --no-opengl-files</code>，注意参数。</p>
+<p>如果重启后运行<code>nvidia-smi</code>输出了显卡信息，恭喜你安装成功了。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u012759136/article/details/53355781">【解决】Ubuntu安装NVIDIA驱动(咨询NVIDIA工程师的解决方案)</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/48220265/cannot-install-nvidia-driver-in-function-block-cpu-fault-locked-error-impli">cannot install nvidia driver , In function ‘block_cpu_fault_locked’: error implicit declaration of function ‘task_stack_page</a><br><a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/254377/xlib-extension-glx-missing-with-an-nvidia-card-and-on-board-graphics">Xlib: extension “GLX” missing - with an NVIDIA card and on-board graphics</a></p>
+</blockquote>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2018/07/26/2018-07-26-how-to-export-ovf-template-from-esxi-server/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2018/01/08/2018-01-08-how-to-run-aarch64-ubuntu-server-cloudimg-on-x86-64/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                ©MorningD | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

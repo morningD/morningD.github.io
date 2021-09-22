@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="default,zh-CN,zh-TW,default">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Morning Duan">
+
+
+    <meta name="subtitle" content="Welcome!! Just write for fun">
+
+
+
+
+
+
+<title>Save my data!! 使用 ext2fsd 挂载ext4分区导致 superblock checksum does not match 问题解决 | Mr Morning</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+  <!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Mr Morning&#39;s Blog</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Deepin/">
+                            Deepin
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/FileSystem/">
+                            FileSystem
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Save my data!! 使用 ext2fsd 挂载ext4分区导致 superblock checksum does not match 问题解决
+            
+            
+        </div>
+        <span class="post-date">
+            Jul 18, 2017
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <img src="http://i.imgur.com/Mn3iIrS.jpg" alt="featured_image">
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="前因后果"><a href="#前因后果" class="headerlink" title="前因后果"></a>前因后果</h1><p>实验室师姐需要在win10下挂载ext3分区，我就百度了一下发现了一个叫Ext2Fsd的神器，能够在windows下挂载ext2,3,4分区，我就下载了最新的Ext2Fsd-0.69在自己的机子上试试效果。我使用了实验室的电脑，安装了win10，移动硬盘上安装了Deepin作为平时工作使用的Linux系统，安装后运行Ext2Fsd果真能挂载移动硬盘中的ext4分区并能够读写。</p>
+<p>当我打算进入Deepin工作的时候悲剧发生了，系统无法挂载我在win10中挂载的分区。开机进入initramfs并且显示superblock checksum does match 的错误。系统里还有很多资料和最近项目的数据呢。</p>
+<span id="more"></span>
+<p>Baidu Google稍微搜索了一下，问题在于Ext4分区在被win10挂载时它的metadata_csum功能会出错。具体原理我懒也没仔细看，可能就像windows和linux双系统系统时间总要差6小时那样。在别的linux下挂载损坏的两个分区也显示superblock错误。（神奇的是win10下使用Ext2Fsd能够挂载，虽然并没卵用！！）最终找到了能够修复分区的方法，Save my data！！</p>
+<h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1><ol>
+<li>首先，由于原系统已经无法进入，我们需要一个可用于维护的Linux系统，我安装Deepin系统到U盘中用于维护。</li>
+<li>打开维护系统的终端，输入<code>sudo fdisk -lu</code>查看分区表，通过分区大小判断是哪些分区出错了，我的情况是<code>sda2，sda6</code>。<br><img src="http://i.imgur.com/ZywNoel.png" alt="img"></li>
+<li>输入<code>sudo tune2fs -l /dev/sda2</code>查看是否开启了metadata_csum功能，输出了一长列数字即是开启了此功能。</li>
+<li>输入<code>sudo fsck.ext4 -p -b 884736 -B 4096 /dev/sda2</code>尝试修复sda2分区，也可以使用<code>fsck -t ext4 /dev/sda2</code>修复，出现提示就一直按y就好了。</li>
+<li><code>sudo reboot</code></li>
+</ol>
+<h1 id="多说一句"><a href="#多说一句" class="headerlink" title="多说一句"></a>多说一句</h1><p>就结果来说还是不错的，但是以后都不敢用Ext2Fsd这类工具了，折中的办法就是在为Linux系统分区时分一部分格式化为NTFS作为共享分区，windows和Linux可以通过这个分区来交换数据。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://askubuntu.com/questions/849872/how-can-i-prevent-windows-10-from-corrupting-the-ext4-superblock-every-time/858309#858309">How can I prevent Windows 10 from corrupting the ext4 superblock every time?</a><br><a target="_blank" rel="noopener" href="http://jingyan.baidu.com/article/495ba841d5330738b20ede44.html">（完美解决）linux 开机进入initramfs无法开机</a></p>
+</blockquote>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2017/11/01/2017-11-01-use-opencc-write-a-python-script/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2017/03/24/Hello-Hexo/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                ©MorningD | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

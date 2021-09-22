@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="default,zh-CN,zh-TW,default">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Morning Duan">
+
+
+    <meta name="subtitle" content="Welcome!! Just write for fun">
+
+
+
+
+
+
+<title>ESXi的ubuntu16.04虚拟机安装pyCaffe | Mr Morning</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+  <!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Mr Morning&#39;s Blog</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Linux/">
+                            Linux
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/Deep-Learning/">
+                            Deep Learning
+                        </a>
+                    </span>    
+                
+                    <span class="post-tag">
+                        <a href="/tags/Vmware/">
+                            Vmware
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                ESXi的ubuntu16.04虚拟机安装pyCaffe
+            
+            
+        </div>
+        <span class="post-date">
+            Aug 21, 2018
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <img src="https://i.imgur.com/GQedJcJ.jpg" alt="featured_image">
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>实验室又腾出来了一台服务器，但是用的TITAN X显卡，所以需要重新安装一遍环境，搞了一天才弄好，这篇博文要记录一下安装过程供之后使用。（很多坑踩了一次又一次）</p>
+<span id="more"></span>
+
+<h1 id="详细步骤"><a href="#详细步骤" class="headerlink" title="详细步骤"></a>详细步骤</h1><h2 id="0-环境参数"><a href="#0-环境参数" class="headerlink" title="0. 环境参数"></a>0. 环境参数</h2><p>首先我要说一下我的环境参数：</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">ESXi</td>
+<td align="left">6.7</td>
+</tr>
+<tr>
+<td align="left">Ubuntu</td>
+<td align="left">16.04</td>
+</tr>
+<tr>
+<td align="left">显卡</td>
+<td align="left">NVIDIA GeForce GTX TITAN X</td>
+</tr>
+<tr>
+<td align="left">显卡驱动</td>
+<td align="left">390.77</td>
+</tr>
+<tr>
+<td align="left">Anaconda3</td>
+<td align="left">5.2.0</td>
+</tr>
+<tr>
+<td align="left">caffe</td>
+<td align="left">1.0</td>
+</tr>
+<tr>
+<td align="left">gcc</td>
+<td align="left">5.4.0</td>
+</tr>
+</tbody></table>
+<h2 id="1-显卡驱动"><a href="#1-显卡驱动" class="headerlink" title="1. 显卡驱动"></a>1. 显卡驱动</h2><p>我这里直接使用ESXi把显卡直通给虚拟机使用，所以下载对应版本的显卡驱动就行了。查看显卡型号输入<code>lspci|grep NVIDIA</code>就可以了，然后到<a target="_blank" rel="noopener" href="https://www.nvidia.com/Download/index.aspx?lang=en">NVIDIA驱动下载</a>下载对应的驱动，操作系统选择Linux 64bit选项，得到一个<code>.run</code>文件。运行显卡驱动run文件，记得加上<code>--no-opengl-files</code>参数，理由和详细步骤看我<a href="https://morningd.github.io/2018/07/20/esxi-ubuntu-install-nvidia-driver/">之前的博文</a>。如果安装成功，输入<code>nvidia-smi</code>命令应该会输出驱动信息，如果输出<code>Unable to determine the device handle for GPU 0000:03:00.0: Unknown Error </code>，可以参考<a target="_blank" rel="noopener" href="https://devtalk.nvidia.com/default/topic/982322/linux/nvidia-smi-reports-unable-to-determine-the-device-handle-for-gpu/">这篇博文</a>。我就遇到了这个问题，按照这篇博文的指导，用ssh登录ESXi主机然后修改ubuntu虚拟机的<code>.vmx</code>文件，添加<code>hypervisor.cpuid.v0 = FALSE</code>一行。</p>
+<h2 id="2-CUDA"><a href="#2-CUDA" class="headerlink" title="2. CUDA"></a>2. CUDA</h2><p>caffe依赖CUDA，这里我安装CUDA8.0。到<a target="_blank" rel="noopener" href="https://developer.nvidia.com/cuda-80-ga2-download-archive">CUDA Toolkit 8.0 - Feb 2017</a>下载对应的CUDA安装程序，选择<code>runfile</code>格式。运行该run文件，不要选择安装显卡驱动，可以添加软链接，选择添加cuda库到环境，省事一些。然后，我们需要把CUDA编译器添加到PATH变量里，编辑<code>～/.bashrc</code>文件，添加<code>export PATH=&quot;/usr/local/cuda/bin:$PATH&quot;</code>，确定这个路径下有nvcc。执行<code>nvcc -V</code>查看CUDA版本号。如果你安装了CUDA示例程序，可以到<code>～/NVIDIA_CUDA-8.0_Samples</code>目录下make，然后执行<code>～/NVIDIA_CUDA-8.0_Samples/1_Utilities/deviceQuery/</code>目录下的<code>./deviceQuery</code>确认CUDA安装好了。</p>
+<h2 id="3-cuDNN"><a href="#3-cuDNN" class="headerlink" title="3. cuDNN"></a>3. cuDNN</h2><p>去<a target="_blank" rel="noopener" href="https://developer.nvidia.com/rdp/cudnn-download">cuDNN Download</a>下载cuDNN，需要注册NVIDIA账号。选择CUDA 8.0版本的，然后下载三个deb文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cuDNN v7.2.1 Runtime Library for Ubuntu16.04 (Deb)</span><br><span class="line">cuDNN v7.2.1 Developer Library for Ubuntu16.04 (Deb)</span><br><span class="line">cuDNN v7.2.1 Code Samples and User Guide for Ubuntu16.04 (Deb)</span><br></pre></td></tr></table></figure>
+<p>按照上面的顺序依次安装三个deb包，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo dpkg -i install libcudnn.deb</span><br><span class="line">sudo dpkg -i install libcudnn-dev.deb</span><br><span class="line">sudo dpkg -i install libcudnn-doc.deb</span><br></pre></td></tr></table></figure>
+<p>如果想要验证是否安装成功，可以运行一下cuDNN的sample，代码在<code>/usr/src/cudnn_samples_v7</code>,例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cp /usr/src/cudnn_samples_v7 ~</span><br><span class="line">cd ~/cudnn_samples_v7/mnistCUDNN</span><br><span class="line">make</span><br><span class="line">./mnistCUDNN</span><br></pre></td></tr></table></figure>
+<h2 id="4-caffe依赖库"><a href="#4-caffe依赖库" class="headerlink" title="4. caffe依赖库"></a>4. caffe依赖库</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler libgflags-dev libgoogle-glog-dev liblmdb-dev</span><br><span class="line">sudo apt install --no-install-recommends libboost-all-dev</span><br><span class="line">sudo apt install libatlas-base-dev libopenblas-dev</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-下载caffe"><a href="#5-下载caffe" class="headerlink" title="5. 下载caffe"></a>5. 下载caffe</h2><p>去<a target="_blank" rel="noopener" href="https://github.com/BVLC/caffe">github</a>下载caffe，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">//你可能需要翻墙</span><br><span class="line">git clone https://github.com/BVLC/caffe.git</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="6-Anaconda3"><a href="#6-Anaconda3" class="headerlink" title="6. Anaconda3"></a>6. Anaconda3</h2><p>去<a target="_blank" rel="noopener" href="https://www.anaconda.com/download/#linux">官网</a>下载python3版本的Anaconda，直接安装到home目录下就可以了，不需要root权限。下载pyCaffe的依赖库，依赖在<code>(caffe目录)/python/requirements.txt</code>里，有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cython numpy scipy scikit-image matplotlib ipython h5py leveldb networkx nose pandas python-dateutil python-gflags pyyaml pillow six</span><br><span class="line">//protobuf，先不安装这个</span><br></pre></td></tr></table></figure>
+<p>这里我用conda创建一个caffe专用的虚拟python环境，名字就叫<code>caffe</code>，这样方便以后配置别的python应用，具体操作如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">//创建一个名叫caffe的python环境，python版本为3.6.5</span><br><span class="line">conda create -n caffe python=3.6.5</span><br><span class="line"></span><br><span class="line">//激活caffe环境</span><br><span class="line">source activate caffe</span><br><span class="line"></span><br><span class="line">//(caffe)字样表明在caffe环境下</span><br><span class="line">//安装pyCaffe依赖库，这里不安装protobuf，因为会和之前安装的protobuf-compiler冲突</span><br><span class="line">conda install cython numpy scipy scikit-image matplotlib ipython h5py leveldb networkx nose pandas python-dateutil python-gflags pyyaml pillow six</span><br></pre></td></tr></table></figure>
+
+<p>把pyCaffe依赖库添加到<code>/etc/ld.so.conf</code>中， ld.so.conf的内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">include /etc/ld.so.conf.d/*.conf</span><br><span class="line">/usr/local/cuda/lib64</span><br><span class="line">/home/(***)/anaconda3/envs/caffe/lib</span><br></pre></td></tr></table></figure>
+
+<p>第二行是cuda库的位置，第三行是之前创建的名叫caffe的环境的库的位置，执行<code>sudo ldconfig</code>更新库内容。<br>修改<code>~/.bashrc</code>文件，添加pyCaffe的路径，此时的<code>~/.bashrc</code>文件应该有以下修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># CUDA库</span><br><span class="line">export PATH=&quot;/usr/local/cuda/bin:$PATH&quot;</span><br><span class="line"></span><br><span class="line"># Anaconda3位置</span><br><span class="line">export PATH=&quot;/home/(***)/anaconda3/bin:$PATH&quot;</span><br><span class="line"></span><br><span class="line"># pyCaffe位置</span><br><span class="line">export PYTHONPATH=&quot;/home/(***)/caffe/python:$PYTHONPATH&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-配置Make文件"><a href="#7-配置Make文件" class="headerlink" title="7. 配置Make文件"></a>7. 配置Make文件</h2><p>确保一下protobuf的版本，<code>protoc --version</code>，这时应该是2.×版本的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd caffe</span><br><span class="line"></span><br><span class="line">//复制一份makefile文件</span><br><span class="line">cp Makefile.config.example Makefile.config</span><br><span class="line"></span><br><span class="line">vim Makefile.config</span><br></pre></td></tr></table></figure>
+<p>需要修改的内容有:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">//使用CUDNN</span><br><span class="line">USE_CUDNN :=1</span><br><span class="line"></span><br><span class="line">//使用anaconda的python库而不用系统的python库，所以注释掉PYTHON_INCLUDE这行</span><br><span class="line">#PYTHON_INCLUDE = /usr/include/python2.7 \</span><br><span class="line">                /usr/lib/python2.7/dist-packages/numpy/core/include</span><br><span class="line"></span><br><span class="line">//取消Anaconda的注释，并且修改内容,要确保目录里有Python.h和numpy/arrayobject.h</span><br><span class="line">//这里的 ANACONDA_HOME 也可能是 $(HOME)/.conda/envs/caffe 确认envs里有之前创建的环境就行</span><br><span class="line">ANACONDA_HOME := $(HOME)/anaconda3/envs/caffe</span><br><span class="line">PYTHON_INCLUDE := $(ANACONDA_HOME)/include \</span><br><span class="line">              $(ANACONDA_HOME)/include \</span><br><span class="line">              $(ANACONDA_HOME)/include/python3.6m \</span><br><span class="line">              $(ANACONDA_HOME)/lib/python3.6/site-packages/numpy/core/include</span><br><span class="line"></span><br><span class="line">//取消PYTHON_LIBRARIES的注释，添加boost_python库路径</span><br><span class="line">//ls -l /usr/lib/x86_64-linux-gnu |grep libboost_python</span><br><span class="line">//看看boost_python库叫什么名字，比如我这里叫libboost_python-py35.so</span><br><span class="line">//所以需要添加一个叫libboost_python3.so的软链接</span><br><span class="line">//sudo ln -s libboost_python-py35.so libboost_python3.so</span><br><span class="line">PYTHON_LIBRARIES := boost_python3 python3.6m</span><br><span class="line"></span><br><span class="line">//取消此处注释</span><br><span class="line">PYTHON_LIB :=$(ANACONDA_HOME)/lib</span><br><span class="line"></span><br><span class="line">//使用caffe的python接口，取消WITH_PYTHON_LAYER的注释</span><br><span class="line">WITH_PYTHON_LAYER := 1</span><br></pre></td></tr></table></figure>
+<h2 id="8-编译caffe"><a href="#8-编译caffe" class="headerlink" title="8. 编译caffe"></a>8. 编译caffe</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd caffe</span><br><span class="line">make all -j32</span><br><span class="line"></span><br><span class="line">//运行caffe测试</span><br><span class="line">make runtest</span><br></pre></td></tr></table></figure>
+<h2 id="9-编译pyCaffe"><a href="#9-编译pyCaffe" class="headerlink" title="9. 编译pyCaffe"></a>9. 编译pyCaffe</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make pycaffe</span><br></pre></td></tr></table></figure>
+<h2 id="10-安装protobuf"><a href="#10-安装protobuf" class="headerlink" title="10. 安装protobuf"></a>10. 安装protobuf</h2><p>之前为了防止版本问题没有安装protobuf的python库，现在已经编译完了，可以安装了,</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">source activate caffe</span><br><span class="line">conda install protobuf</span><br></pre></td></tr></table></figure>
+<p>这时候<code>protobuf --version</code>应该是3.×版本的。</p>
+<h2 id="11-配置notebook"><a href="#11-配置notebook" class="headerlink" title="11. 配置notebook"></a>11. 配置notebook</h2><p>首先看看pyCaffe有没有安装好，打开终端：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">source activate caffe</span><br><span class="line">(caffe)python</span><br><span class="line">&gt;&gt;&gt; import caffe</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<p>如果显示如下表明pyCaffe已经装好了。</p>
+<p>然后需要配置一下jupyter notebook<br>首先为conda的caffe环境安装notebook</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">source activate caffe</span><br><span class="line"></span><br><span class="line">//为caffe环境安装notebook</span><br><span class="line">conda install notebook</span><br><span class="line"></span><br><span class="line">//生成jupyter的配置文件</span><br><span class="line">jupyter notebook --generate-config</span><br><span class="line"></span><br><span class="line">//修改jupyter的配置文件，把c.NotebookApp.ip的值改为自己的ip地址，允许通过ip地址访问notebook</span><br><span class="line">vim ~/.jupyter/jupyter_notebook_config.py</span><br><span class="line"></span><br><span class="line">//设置notebook的密码</span><br><span class="line">jupyter notebook password</span><br></pre></td></tr></table></figure>
+<p>配置好后就能够通过 ipaddr:8888 的方式访问了。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><blockquote>
+<p><a target="_blank" rel="noopener" href="https://caffe.berkeleyvision.org/installation.html">Caffe/Installation</a><br><a target="_blank" rel="noopener" href="https://caffe.berkeleyvision.org/install_apt.html">Caffe/Ubuntu Installation</a><br><a href="https://morningd.github.io/2018/07/20/esxi-ubuntu-install-nvidia-driver/">ESXI上的UBUNTU16.04虚拟机安装NVIDIA驱动</a><br><a target="_blank" rel="noopener" href="https://devtalk.nvidia.com/default/topic/982322/linux/nvidia-smi-reports-unable-to-determine-the-device-handle-for-gpu/">nvidia-smi reports Unable to determine the device handle for GPU</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/wangkun1340378/article/details/78109438">Jupyter Notebook之web访问密码设定</a><br><a target="_blank" rel="noopener" href="https://github.com/BVLC/caffe/wiki/Ubuntu-16.04-Installation-Guide">Github/BVLC/caffe/Ubuntu 16.04 Installation Guide</a></p>
+</blockquote>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2019/07/20/2019-07-20-free-use-of-colabs-bandwidth/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2018/07/26/2018-07-26-how-to-export-ovf-template-from-esxi-server/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                ©MorningD | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>

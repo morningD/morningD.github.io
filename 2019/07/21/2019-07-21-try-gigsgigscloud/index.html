@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="default,zh-CN,zh-TW,default">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="Morning Duan">
+
+
+    <meta name="subtitle" content="Welcome!! Just write for fun">
+
+
+
+
+
+
+<title>GigsGigsCloud试坑 | Mr Morning</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+  <!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><meta name="generator" content="Hexo 5.4.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">Mr Morning&#39;s Blog</a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/VPS/">
+                            VPS
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                GigsGigsCloud试坑
+            
+            
+        </div>
+        <span class="post-date">
+            Jul 21, 2019
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <img src="https://i.imgur.com/7lXF5fa.jpg" alt="featured_image">
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近VPS都在涨价，就连Bandwagon家的最便宜的方案都要50刀/year。虽然之前购买过便宜套餐的用户可以通过续费一直维持下去，但我想趁这个机会试试别家的VPS。GigsGigsCloud家的HK VPS非常便宜，但是网上评价褒贬不一，据说非常不稳定因此被戏称作GG Boom。于是我决定先买个1个月试试水。</p>
+<span id="more"></span>
+
+<h1 id="套餐选择"><a href="#套餐选择" class="headerlink" title="套餐选择"></a>套餐选择</h1><p>GigsGigsCloud的机房在HK和SG，提供CLOUDLET V，CLOUDLET K，CLOUDLET B三种套餐。其中V是高端套餐，电信联通移动直连；CLOUDLET K是KVM架构，据称对特定线路有优化；CLOUDLET B是普通套餐，openVZ架构。我选择的是CLOUDLET K（HK-China），因为V太贵了，数据还很少，而B套餐太便宜了，不敢买。你可以在<a target="_blank" rel="noopener" href="https://clientarea.gigsgigscloud.com/index.php?/cart/cloudlet-k--hk-china-/&step=0">clientarea</a>查看详细的套餐列表，部分套餐如下图。我买的5.8刀/月的套餐已经没有了，最便宜的是8.8刀/月的套餐，此外可以用网友提供的推荐码打折，但貌似只能打折一次。</p>
+<p><img src="https://i.imgur.com/ZNz3fsd.png" alt="img"></p>
+<p>我购买的的套餐参数如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Price</td>
+<td align="left">5.8$/month</td>
+</tr>
+<tr>
+<td align="left">CPU</td>
+<td align="left">1*vCore</td>
+</tr>
+<tr>
+<td align="left">RAM</td>
+<td align="left">500M</td>
+</tr>
+<tr>
+<td align="left">Storage</td>
+<td align="left">15G SSD</td>
+</tr>
+<tr>
+<td align="left">IP</td>
+<td align="left">1*IPv4</td>
+</tr>
+<tr>
+<td align="left">Bandwidth</td>
+<td align="left">30Mbps Max</td>
+</tr>
+<tr>
+<td align="left">Data Transfer</td>
+<td align="left">400GB</td>
+</tr>
+<tr>
+<td align="left">Location</td>
+<td align="left">HK</td>
+</tr>
+</tbody></table>
+<h1 id="使用体验"><a href="#使用体验" class="headerlink" title="使用体验"></a>使用体验</h1><ol start="0">
+<li>延迟<br>使用站长工具提供的<a target="_blank" rel="noopener" href="https://ping.chinaz.com/">多地Ping工具</a>测试延迟，结果如下：</li>
+</ol>
+<p>其中电信线路延迟最低，平均52.6ms，可以对比我买的Bandwagon家的LA机房CN2线路，电信线路平均延迟178.5ms。<br><img src="https://i.imgur.com/FKTUeNI.png" alt="img"></p>
+<p>下图为各省的延迟，可以看到延迟都很低（福建超时应该是工具的问题）。总而言之，HK的机子还是很香的。<br><img src="https://i.imgur.com/L26wEwl.png" alt="img"></p>
+<ol>
+<li><p>带宽<br>由于我的水管小，只有10M，所以不怎么好测试。我用speedtest测了一下，可以跑满。</p>
+</li>
+<li><p>稳定性<br>没遇到过网友说的情况。但GigsGigsCloud的确实给人感觉比较卡，rebuild系统比Bandwagon慢（重置密码花了十几分钟）。<br>另外GigsGigsCloud不提供带BBR的系统镜像，所以需要自己安装。</p>
+</li>
+</ol>
+<p>可以安装centos7.5后使用脚本来安装BBR：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget --no-check-certificate https://github.com/teddysun/across/raw/master/bbr.sh &amp;&amp; chmod +x bbr.sh &amp;&amp; ./bbr.sh</span><br></pre></td></tr></table></figure>
+<p>该脚本会更新内核并安装BBR，完成后输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sysctl net.ipv4.tcp_available_congestion_control</span><br></pre></td></tr></table></figure>
+<p>如果返回<code>net.ipv4.tcp_available_congestion_control = bbr cubic reno</code>便是安装成功了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p><img src="https://i.imgur.com/vcf41nC.jpg" alt="img"></p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2019/07/20/2019-07-20-dig-deeper-in-federated-learning-advantages-and-challenges/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+                ©MorningD | 
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://hexo.io/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+  </body>
+</html>
